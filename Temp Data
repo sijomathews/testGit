@@ -1,0 +1,51 @@
+26-Apr-10	06-Nov-15	2021	5y,6m,0w,12d	
+11-Dec-15	30-Sep-16	295	0y,9m,0w,20d	
+05-Dec-16	01-Mar-18	452	1y,2m,0w,25d	
+21-Jun-18	02-Apr-19	286	9y,0m,0w,13d	
+		3054	8y,4m,1w,5d,5h	
+07-Nov-15	10-Dec-15	34	0y,1m,0w,0d	
+01-Oct-16	04-Dec-16	65	0y,2m,0w,0d	
+02-Mar-18	20-Jun-18	111	0y,3m,2w,5d	
+		210	6m,3w,6d,8h	
+
+Rate	hrs per day	earn per day	days per week	earn per week		
+40	7.5	300	5	1500		
+70	7.5	525	5	2625		
+						
+3000	24-Dec	04-Jan	10	Furlough	150000	INR
+4500	12-Jan	01-Feb	15	Holidays	225000	INR
+3447	Flight Ticket				187700	
+10947					562700	
+						
+3000	24-Dec	04-Jan	10	Furlough	150000	INR
+3000	10-Dec	21-Dec	10	Holidays	150000	INR
+4315	Flight Ticket				241400	
+10315					541400	
+						
+632	Notional Profit				21300	
+
+	Working Days	With Vacation+Sick
+Jun-18	7	
+Jul-18	22	
+Aug-18	23	
+Sep-18	20	
+Oct-18	23	-1 19-Oct
+Nov-18	22	
+Dec-18	15	-10 10-Dec - 14-Dec, 17-Dec-21-Dec
+Jan-19	19	
+Feb-19	20	-1 25-Feb
+Mar-19	21	-1 5-Mar
+Apr-19	22	
+May-19	23	
+Jun-19	14	
+	251	238
+-3900	75300	71400
+		
+	Till Date	53700
+	INR	2685000
+
+	FY	AY	From	To	Refund	Interest			
+Nov-14	2013-2014	2014-2015	03-Sep-13	31-Mar-14	339901	13596	-4202	349300	
+Feb-16	2013-2014	2014-2015	03-Sep-13	31-Mar-14	610110	44669	-9601	645178	291678
+Feb-16	2014-2015	2015-2016	01-Apr-14	31-Mar-15	888441	48862	-15099	922200	
+Feb-19	2015-2016	2016-2017	01-Apr-15	31-Jul-16	53401	6141	0	59540	
