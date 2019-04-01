@@ -1,0 +1,40 @@
+GitHub Flow					
+How it works					
+1	Create feature/hotfix branch				
+	git fetch	---	Summary of change		
+	git checkout -b feature/DD-123 origin/master	---	Create new feature		
+2	Pushing feature branch to remote				
+	git push -u origin feature/DD-123				
+3	Create release branch from master				
+	git checkout -b release/1.2.3 master				
+4	Incorporating a finished feature into release				
+	git checkout release/1.2.3				
+	git pull	---	Integrate all features		
+	git merge --no-ff feature/DD-123	---	Merge feature into release		
+	git push origin :feature/DD-123				
+					
+	git branch -d feature/DD-123	---	Deleted feature/DD-123 branch		
+	git push origin release/1.2.3				
+5	Push release branch to remote				
+	git push -u origin release/1.2.3				
+6	Finishing a release branch				
+	git checkout master	---	Switched to branch master		
+	git pull	---	Summary of change		
+	git merge --no-ff release/1.2.3	---	Merge release into master		
+	git tag -a release/1.2.3	---	Add tag for tracing		
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+Branch	Description	Branches Off	Merges Into	Branch Prefix	Branch Owner
+Master	Prod	n/a	n/a	n/a	Proj Owner
+--------	--------	--------	-------	--------	--------
+Feature	Current work upcoming release or new feature	master	release	feature/	Developer
+Release	A new production release	master	master	release/	Release Co-ord
+Hotfix	Similar to feature branch, but may merge sooner	master	release	hotfix/	Developer
