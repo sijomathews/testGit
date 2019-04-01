@@ -1,0 +1,16 @@
+JQL
+
+Pending
+assignee in (sijo) AND status != DONE ORDER BY status ASC
+
+All
+assignee in (sijo) ORDER BY status ASC
+
+Done
+assignee in (sijo) AND status = DONE ORDER BY updatedDate DESC 
+
+All touched
+summary ~ currentUser() OR description ~ currentUser() OR assignee = currentUser() OR worklogAuthor = currentUser() OR comment ~ currentUser() OR watcher = currentUser() OR text ~ currentUser() OR creator = currentUser() OR voter = currentUser() OR assignee was currentUser()
+
+Diff touch all
+(summary ~ currentUser() OR description ~ currentUser() OR assignee = currentUser() OR worklogAuthor = currentUser() OR comment ~ currentUser() OR watcher = currentUser() OR text ~ currentUser() OR creator = currentUser() OR voter = currentUser() OR assignee was currentUser()) AND (assignee not in (sijo) OR assignee is EMPTY)
