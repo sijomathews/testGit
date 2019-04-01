@@ -1,0 +1,40 @@
+Git Flow					
+How it works					
+1	Create feature branch				
+	git fetch	---	Summary of change		
+	git checkout -b feature/DD-123 origin/develop	---	Create new feature		
+2	Pushing feature branch to remote				
+	git push -u origin feature/DD-123				
+3	Incorporating a finished feature into develop				
+	git checkout develop	---	Switched to branch develop		
+	git pull	---	Summary of change		
+	git merge --no-ff feature/DD-123	---	Merge feature branch into develop branch		
+					
+	git branch -d feature/DD-123	---	Deleted feature/DD-123 branch		
+	git push origin :feature/DD-123				
+					
+	git push origin develop	---	Push merged develop branch		
+4	Create release branch from develop				
+	git checkout -b release/1.2.3 origin/develop				
+5	Push release branch to remote				
+	git push -u origin release/1.2.3				
+6	Finishing a release branch				
+	git checkout master	---	Switched to branch master		
+	git pull	---	Summary of change		
+	git merge --no-ff release/1.2.3	---	Merge release into master		
+	git tag -a 1.2.3	---	Add tag for tracing		
+7	Merge master to develop	---	To ensure sync of any bug fix done in release 		
+8	Delete release branch				
+					
+	Working with hotfixes				
+1	Create hotfix branch of master for each issue.				
+2	Push hotfix branch				
+3	Create 2 pull request	1) hotfix to master branch			
+		2) master to develop branch			
+					
+Branch	Description	Branches Off	Merges Into	Branch Prefix	Branch Owner
+master	Prod	n/a	develop	n/a	Proj Owner
+develop	Current work for upcoming release	master	n/a	n/a	Release Co-ord
+feature	New features for upcoming or future release	develop	develop	feature/	Developer
+release	A new production release	develop	master	release/	Release Co-ord
+hotfix	A new, unplanned, production release	master	master	hotfix/	Developer
