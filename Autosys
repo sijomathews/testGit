@@ -1,0 +1,41 @@
+INACTIVE 	 The job has not yet been processed. Either the job has never been run, or its status was intentionally altered to “turn off” its previous completion status.
+ACTIVATED 	The top-level box that this job is in is now in the RUNNING state, but the job itself has not started yet.
+STARTING 	 The event processor has initiated the start job procedure with the Remote Agent.
+RUNNING 	 The job is running. If the job is a box job, this value simply means that the jobs within the box may be started (other conditions permitting). If it is a command or file watcher job, the value means that the process is actually running on the remote machine.
+SUCCESS 	 The job exited with an exit code equal to or less than the “maximum exit code for success.” By default, only the exit code “0” is interpreted as “success.” If the job is a box job, this value means that all the jobs within the box have finished with the status SUCCESS (the default), or the “Exit Condition for Box Success” evaluated to true
+FAILURE 	 The job exited with an exit code greater than the “maximum exit code for success.” By default, any number greater than zero is interpreted as “failure.” AutoSys issues an alarm if a job fails
+TERMINATED 	 The job terminated while in the RUNNING state. A job can be terminated if a user sends a KILLJOB event or if it was defined to terminate if the box it is in failed. If the job itself fails, it has a FAILURE status, not a TERMINATED status. A job may also be terminated if it has exceeded the maximum run time (term_run_time attribute, if one was specified for the job), or if it was killed from the command line through a UNIX kill command. AutoSys issues an alarm if a job is terminated.
+RESTART 	 The job was unable to start due to hardware or application problems, and has been scheduled to restart.
+QUE_WAIT 	 The job can logically run (that is, all the starting conditions have been met), but there are not enough machine resources available.
+ON_HOLD 	 This job is on hold and will not be run until it receives the JOB_OFF_HOLD event.
+ON_ICE 	 This job is removed from all conditions and logic, but is still defined to AutoSys. Operationally, this condition is like deactivating the job. It will remain on ice until it receives the JOB_OFF_ICE event.
+	
+	https://www.unix.com/unix-for-advanced-and-expert-users/28633-autosys-tutorials.html
+	http://javahonk.com/how-define-autosys-job-example/
+	https://maxwellmiranda.wordpress.com/2009/08/27/autosys-scheduler-cheatsheet/
+
+Open JIL prompt	jil
+Add Jil file to job db	jil < JIL_FILE_NAME
+Delete job	go into jil prompt
+	"delete_job:space_bar_key <JOB NAME>
+exit"
+Force start job	 sendevent -E FORCE_STARTJOB -J WS5_P_JOB_IAM_AVEKSA_FXEOPS
+Job Status	autorep -j %JOB_NAME%
+View Job Details	autorep -j %JOB_NAME% -q
+Update Job	jil < Updated_JIL_FILE_NAME
+All the topest level boxes	autorep -J ALL -L 0
+Jobs inside the top level box	autorep -J ALL -L 1
+Put job on hold	sendevent -E JOB_ON_HOLD -J "JOB_NAME"
+	sendevent -j <JOBNAME> -e <EVENT>
+Events	STARTJOB
+	FORCE_STARTJOB
+	KILLJOB
+	DELETEJOB
+	JOB_ON_ICE
+	JOB_OFF_ICE
+	JOB_ON_HOLD
+	JOB_OFF_HOLD
+	
+	CHANGE_STATUS
+	sendevent -j <JOB> -e CHANGE_STATUS -s STATUS
+Statuses	ACTIVATED, FAILURE, INACTIVE, ON_HOLD, ON_ICE, QUE_WAIT, REFRESH_DEPENDENCIES, REFRESH_FILEWATCHER, RESTART, RUNNING, STARTING, SUCCESS, TERMINATED
