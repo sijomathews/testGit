@@ -1,0 +1,90 @@
+Configure Git for the first time
+git config --global user.name "Mathews, Sijo"
+git config --global user.email "SIJO.MATHEWS@Bmo.com"
+
+Status
+git status
+
+Config list
+git config --list
+
+Create Local
+cd existing-project
+git init
+
+Ignore File
+.gitignore
+https://github.com/github/gitignore
+
+View history
+git log
+
+Difference between Commits
+git diff
+
+View associate remote repo
+git remote -v
+
+Associate new remote
+git remote add origin <url>
+
+Clone
+git clone <url>
+
+Summary of changes
+git fetch
+
+Add single file
+git add <filename>
+
+Add all new & modified files 
+git add .
+
+Stage all changes, incl. deleted files
+git add -A
+
+Committing your code to repo
+git commit -m "<your message>"
+
+Add & commit tracked files
+git commit -am "<your message>"
+
+Create Branch
+git branch <branch-name>
+
+Checkout Branch
+git checkout <branch_name>
+
+Create & point to the branch
+git checkout -b <branch_name>
+
+Merge -To merge feature1/DD-123 into master, we checkout master first
+git checkout master
+git merge feature1/DD-123
+
+Merge -force new commit point
+git merge --no-ff master
+
+Pull performs two action under hood
+git fetch - download all from remote repo
+git merge - remote with local
+
+Push Code -make new branch available remotely
+git push -u origin <branch_name>
+
+Push Code -branch already exists remotely
+git push
+
+Push Code
+cd existing-project
+git init
+git add --all
+git commit -m "Initial Commit"
+git remote add origin <url>
+git push -u origin master
+
+Code already in Git
+cd existing-project
+git remote set-url origin <url>
+git push -u origin --all
+git push origin --tags
