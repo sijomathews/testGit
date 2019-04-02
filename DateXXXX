@@ -1,0 +1,63 @@
+#!/bin/ksh
+#
+# Return the First, Second, Third, ..., or Last week day of the month
+# 
+# Default is to return the first week day.
+#   Usage:  week_day_of_month [F|1|2|3|..|L]
+# 
+# Example for checking if today is the first week day of the month:
+#    TODAY=`date +%d`
+#    FBDOM=`week_day_of_month`
+#    if [ $TODAY -eq $FBDOM ]; then
+#       . . . .
+#    fi
+#
+
+Year=`date +%Y`
+Month=`date +%m`
+
+Year2=$Year
+((NextMonth = Month + 1))
+if [[ $NextMonth = 13 ]]; then
+    NextMonth=1
+    (( Year2 = Year + 1))
+fi
+
+LastDayofMonth=$(date +%d -d "$NextMonth/1/$Year2 -1 day")
+
+DayofWeek1=`date -d "$Month/1/$Year" +%u`
+DayofWeek2=`date -d "$NextMonth/1/$Year2 -1 day" +%u`
+
+# find the last week day of the month
+if [[ $DayofWeek2 = 6 || $DayofWeek2 = 7 ]]    # if it's Sat or Sun
+then (( Offset = 5 - DayofWeek2 ))    # then make it Fri
+     LastBusinessDay=$(date +%d -d "$Month/$LastDayofMonth/$Year $Offset day")
+else
+     LastBusinessDay=$LastDayofMonth
+fi
+
+# find the first week day of the month
+if [[ $DayofWeek1 = 6 || $DayofWeek1 = 7 ]]    # if it's Sat or Sun
+then (( Offset = 8 - DayofWeek1 ))    # then make it Fri
+     FirstBusinessDay=$(date +%d -d "$Month/1/$Year $Offset day")
+else
+     FirstBusinessDay="01"
+fi
+
+if [ $# -lt 1 ]; then
+   echo $FirstBusinessDay
+   exit 0
+fi
+
+case $1 in 
+      F) echo $FirstBusinessDay;;
+      L) echo $LastBusinessDay;;
+      *) Offset=$1
+         (( Offset=Offset - 1))
+         ((Weeks=Offset / 5))
+         ((Weeks=Weeks * 2))
+         (( Offset=Offset + Weeks))
+         (( FirstBusinessDay=FirstBusinessDay+Offset))
+         printf "%02d\n" $FirstBusinessDay
+         ;;
+esac
