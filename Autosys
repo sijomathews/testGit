@@ -39,3 +39,31 @@ Events	STARTJOB
 	CHANGE_STATUS
 	sendevent -j <JOB> -e CHANGE_STATUS -s STATUS
 Statuses	ACTIVATED, FAILURE, INACTIVE, ON_HOLD, ON_ICE, QUE_WAIT, REFRESH_DEPENDENCIES, REFRESH_FILEWATCHER, RESTART, RUNNING, STARTING, SUCCESS, TERMINATED
+
+
+
+/* ----------------- BOX_TEST----------------- */
+
+insert_job: BOX_TEST   job_type: b
+#owner: 
+permission: gx,ge,wx,we,mx,me
+date_conditions: 1
+days_of_week: mo
+start_times: "12:05"
+alarm_if_fail: 1
+
+/* ----------------- JOB_TEST ----------------- */
+
+insert_job: JOB_TEST   job_type: c
+box_name: BOX_TEST
+command: Test.sh 20190114
+machine: localhost
+#owner: user@localhost
+permission:
+date_conditions: 1
+description: "TEST JOB"
+std_out_file: test.log
+std_err_file: test.err
+max_run_alarm: 30
+alarm_if_fail: 1
+profile: autosys/profile/wss_profile_autosys
