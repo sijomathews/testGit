@@ -1,0 +1,201 @@
+#!/bin/ksh
+#set -x
+
+# source profile if it is needed
+[[ "`/usr/bin/tty`" == "not a tty" ]] && . ~/.profile
+
+cd `dirname $0`
+PROG_NAME=`basename $0`
+
+S_FLAG=1
+if [[ $# -gt 0 && $1 == "+s" ]]; then
+  S_FLAG=0
+  shift
+fi
+
+if [ $# -lt 2 ]
+then echo "Usage: $PROG_NAME <sql_file> <cfg_file> [business_date]"
+     echo "  e.g. $PROG_NAME atms.sql atms_sql.cfg 20121101"
+     echo ""
+     exit 1
+fi
+
+#-- check sql file
+if [ ! -e ../sql/$1 ]
+then echo "$1 not exists."
+     exit 1
+fi
+
+#-- check cfg file
+if [ ! -e ../config/$2 ]
+then echo "$2 not exists."
+     exit 1
+fi
+
+#-------------------------------------------------------------------
+
+SQL_FILE=../sql/$1
+CFG_FILE=../config/$2
+shift 2
+
+BUZ_DATE=`date +%Y%m%d`
+if [ $# -gt 0 ]
+then BUZ_DATE=$1
+     shift
+fi
+
+#-------------------------------------------------------------------
+EMAIL_COMPRESSION="Y"
+
+. $CFG_FILE
+
+DO_COMPRESSION="Y"
+if [[ "$EMAIL_COMPRESSION" = "N" ]]
+then
+  DO_COMPRESSION="N"
+  echo "Email compression is : off"
+else
+  echo "Email compression is : on"
+fi
+
+LOG_DIR=../../log/$FEED_DIRECTORY
+DATA_DIR=../../data/$FEED_DIRECTORY
+mkdir -p $LOG_DIR $DATA_DIR
+
+LOG_FILE=$LOG_DIR/$LOG_FILE
+TMP_FILE=sql.$$
+RPT_FILE=${RPT_FILE:-$TMP_FILE}
+
+RPT_FILE=$DATA_DIR/$RPT_FILE
+RPT_FILE=`echo $RPT_FILE | sed "s/YYYYMMDD/$BUZ_DATE/"`
+
+echo "" >> $LOG_FILE
+echo "report starts at `date` "
+echo "report starts at `date` " >> $LOG_FILE
+echo "SQL_FILE=$SQL_FILE" >> $LOG_FILE
+echo "CFG_FILE=$CFG_FILE" >> $LOG_FILE
+echo "BUZ_DATE=$BUZ_DATE" >> $LOG_FILE
+echo "additiona parameter: $@" >> $LOG_FILE
+echo "LOG_FILE=$LOG_FILE" >> $LOG_FILE
+echo "RPT_FILE=$RPT_FILE" >> $LOG_FILE
+
+LOG_SQL=${LOG_SQL:-0}
+if [[ $S_FLAG == 1  && $LOG_SQL == 1 ]]; then
+  S_FLAG=0
+  echo "SET MARKUP HTML ON"    > ${SQL_FILE}.tmp
+  echo "SET ECHO ON"          >> ${SQL_FILE}.tmp
+  cat $SQL_FILE               >> ${SQL_FILE}.tmp
+
+  SQL_FILE=${SQL_FILE}.tmp
+fi
+
+#-------------------------------------------------------------------
+
+#-- get DB password if it is encrypted
+if [ x"$DB_PASSWORD_ENC" = x"Y" ]
+then echo "decrypt DB password ..." >> $LOG_FILE
+     echo "$DB_PASSWORD_CMD" >> $LOG_FILE
+     DB_PASSWORD=`eval $DB_PASSWORD_CMD 2>>$LOG_FILE`
+fi
+
+#-- get DB NAME
+DB_NAME=`echo $DB_CONNECT_STRING | sed 's/\([0-9][0-9]*\):/\1\//'`
+echo DB_NAME=$DB_NAME
+
+#-- backup existing file
+if [[ ! -z $RPT_FILE  && -f $RPT_FILE ]]
+then TIMESTAMP=`stat -c %y $RPT_FILE | sed 's/[- :]//g' | cut -c1-14`
+     mv -f $RPT_FILE ${RPT_FILE}.$TIMESTAMP
+fi
+
+echo "sqlplus $DB_USER_ID/@$DB_NAME @$SQL_FILE $BUZ_DATE $@" >> $LOG_FILE
+if [[ $S_FLAG == 1 ]]
+then
+  echo quit | sqlplus -s $DB_USER_ID/"${DB_PASSWORD}"@$DB_NAME \
+              @$SQL_FILE $BUZ_DATE "$@" >$RPT_FILE 2>> $LOG_FILE
+  retval=$?
+else
+  echo quit | sqlplus $DB_USER_ID/"${DB_PASSWORD}"@$DB_NAME \
+              @$SQL_FILE $BUZ_DATE "$@" >$RPT_FILE 2>> $LOG_FILE
+  retval=$?
+fi
+echo "retval=$retval" >> $LOG_FILE
+
+#-- check for delimeter
+if grep -i colsep $SQL_FILE > /dev/null 2>&1
+then echo "trim spaces before and after delimiter" >> $LOG_FILE
+     SEP=`grep -i colsep $SQL_FILE | awk '{print $3}'`
+     eval "SEP=$SEP"
+     sed "s/[ \t]*$SEP/$SEP/g
+          s/$SEP[ \t]*/$SEP/g" $RPT_FILE > ${RPT_FILE}.tmp
+     mv -f ${RPT_FILE}.tmp ${RPT_FILE}
+fi
+
+#-- email out the report
+EMAIL_FROM=${EMAIL_FROM:-""}
+EMAIL_LIST=${EMAIL_LIST:-""}
+EMAIL_CC_LIST=${EMAIL_CC_LIST:-""}
+EMAIL_REC_NUM=${EMAIL_REC_NUM:-0}
+COUNT=$(cat $RPT_FILE | wc -l)
+
+echo "EMAIL_LIST=$EMAIL_LIST" >> $LOG_FILE
+echo "EMAIL_REC_NUM=$EMAIL_REC_NUM" >> $LOG_FILE
+echo "COUNT=$COUNT" >> $LOG_FILE
+
+if [[ -n "$EMAIL_LIST" && $COUNT -ge $EMAIL_REC_NUM ]]
+then
+      (
+      #-- email header
+      if [[ -n "$EMAIL_FROM" ]]; then
+         echo "From: $EMAIL_FROM"
+      fi
+      echo "To: $EMAIL_LIST"
+      if [[ -n "$EMAIL_CC_LIST" ]]; then
+         echo "Cc: $EMAIL_CC_LIST"
+      fi
+      echo "Subject: $EMAIL_SUBJECT"
+
+      echo "MIME-Version: 1.0"
+      echo 'Content-Type: multipart/mixed; boundary="-q1w2e3r4"'
+      echo '---q1w2e3r4'
+
+      #-- email body (html)
+      #-- If report file name is defined, attached the file; Otherwise, embeded in email body
+      echo "Content-Type: text/html"
+      echo "Content-Disposition: inline"
+      #echo "Content-type: text/plain; charset=us-ascii"
+      echo ""
+      echo "$EMAIL_MESSAGE"
+      if [ `basename $RPT_FILE` = $TMP_FILE ]; then
+         cat ${RPT_FILE}
+         echo ""
+         echo '---q1w2e3r4--'
+      else
+         echo '---q1w2e3r4'
+         #-- email attachement
+         echo "Content-Transfer-Encoding: base64"
+         if [[ $DO_COMPRESSION = "Y" ]]
+         then
+           echo 'Content-Disposition: attachment; filename="'`basename $RPT_FILE`.gz'"'
+           gzip -c $RPT_FILE | uuencode --base64 `basename $RPT_FILE`.gz
+         else
+           echo 'Content-Disposition: attachment; filename="'`basename $RPT_FILE`'"'
+           cat $RPT_FILE | uuencode --base64 `basename $RPT_FILE`
+         fi
+         echo '---q1w2e3r4--'
+      fi
+      ) | /usr/sbin/sendmail -t
+
+      echo "Email report to \"$EMAIL_LIST\"" >> $LOG_FILE
+fi
+
+if [ `basename $RPT_FILE` = $TMP_FILE ]; then
+   rm -f $RPT_FILE
+fi
+
+echo "RPT_FILE=$RPT_FILE"
+echo "LOG_FILE=$LOG_FILE"
+echo "report ends (retval=$retval) at `date`"
+echo "report ends (retval=$retval) at `date`" >> $LOG_FILE
+
+exit $retval
