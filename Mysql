@@ -1,0 +1,28 @@
+SELECT * FROM USER_SYS_PRIVS;--DB user privs
+
+SELECT * FROM USER_ROLE_PRIVS;--DB user roles
+
+select * from table_privileges; --all priv
+
+select * from user_DB_LINKS; --db links
+
+SELECT * FROM global_name; --current database
+
+select *
+  from v$sql sq, v$session se, v$open_cursor oc
+ where sq.sql_id = oc.sql_id
+   and se.saddr = oc.saddr
+   and se.sid = oc.sid
+   and se.audsid = SYS_CONTEXT('userenv', 'sessionid')
+ order by oc.LAST_SQL_ACTIVE_TIME desc;--last run sql
+ 
+SELECT * FROM all_source WHERE text LIKE '%result_tt%';--search table in sp
+
+SELECT LTRIM(SYS_CONNECT_BY_PATH(column_name, '||'),'||') Concatenated_Names
+FROM (
+SELECT column_name, ROW_NUMBER() OVER (order by column_name) rownumber, COUNT(*) OVER () cnt
+FROM (SELECT column_name FROM all_tab_columns where owner='WSS_SDR_OWNER' and table_name='DUPS_TT')
+) data
+WHERE rownumber = cnt
+START WITH rownumber = 1
+CONNECT BY PRIOR rownumber = rownumber-1;--concatenate rows into single column
